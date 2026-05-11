@@ -1,0 +1,28 @@
+{
+  "name": "nexus-os",
+  "version": "0.1.0",
+  "description": "The OS that understands you — intent-driven computing with a knowledge graph kernel",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop nexus",
+    "ui:dev": "cd ui && npm run dev",
+    "ui:build": "cd ui && npm run build",
+    "electron": "cd ui && npm run electron",
+    "graph:build": "node graph/build.js",
+    "graph:watch": "node graph/watcher.js",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "chokidar": "^3.6.0",
+    "dotenv": "^16.6.1",
+    "mime-types": "^2.1.35",
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0"
+  }
+}

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+ui/node_modules/
+
+# Build output
+ui/dist/
+ui/release/
+
+# Logs
+logs/
+
+# Environment (contains API keys)
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Graph database
+*.db
+*.db-shm
+*.db-wal
+.nexus/
+
+# Test artifacts
+/tmp/
+
+# Electron
+*.dmg
+*.zip

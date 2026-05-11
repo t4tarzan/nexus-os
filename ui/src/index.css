@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+    background: #0a0a0f;
+    color: #e2e2f0;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e1e2e;
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  .glass {
+    background: rgba(20, 20, 31, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(30, 30, 46, 0.6);
+  }
+
+  .intent-bar {
+    @apply glass rounded-2xl px-6 py-4 w-full max-w-2xl;
+    @apply text-lg text-nexus-text placeholder-nexus-muted;
+    @apply focus:outline-none focus:ring-2 focus:ring-nexus-accent/50;
+    @apply transition-all duration-200;
+  }
+
+  .result-card {
+    @apply glass rounded-xl p-4 animate-slide-up;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+    @apply hover:brightness-110 active:scale-95;
+  }
+
+  .btn-primary {
+    @apply btn bg-nexus-accent text-white;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-nexus-border/50 text-nexus-muted;
+  }
+}

@@ -6,6 +6,7 @@ import {
   Loader2, Send, MicOff, Brain, BarChart3, Lightbulb,
   RefreshCw, Volume2, Zap
 } from 'lucide-react';
+import NexusAvatar from './Avatar';
 
 // ─── Title Bar ───
 function TitleBar({ status }) {
@@ -194,9 +195,12 @@ export default function App() {
   const [stats, setStats] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [avatarExpression, setAvatarExpression] = useState('neutral');
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const wsRef = useRef(null);
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const avatarRef = useRef(null);
 
   // Connect to Nexus server
   const connect = useCallback(() => {
@@ -243,6 +247,19 @@ export default function App() {
 
       // Route events to the message timeline
       if (['thinking', 'routed', 'executing', 'result', 'error', 'clarify'].includes(data.type)) {
+        // Update avatar expression based on what's happening
+        if (data.type === 'thinking') setAvatarExpression('thinking');
+        if (data.type === 'routed') setAvatarExpression('neutral');
+        if (data.type === 'executing') setAvatarExpression('neutral');
+        if (data.type === 'result') {
+          setAvatarExpression(data.success ? 'happy' : 'neutral');
+          setIsSpeaking(true);
+          // Auto-reset speaking after result is shown
+          setTimeout(() => setIsSpeaking(false), 3000);
+        }
+        if (data.type === 'error') setAvatarExpression('surprised');
+        if (data.type === 'clarify') setAvatarExpression('thinking');
+
         setMessages(prev => {
           // Replace thinking/routed/executing with final result for cleaner UI
           if (data.type === 'result' || data.type === 'error') {
@@ -341,9 +358,12 @@ export default function App() {
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-nexus-accent/10 flex items-center justify-center animate-pulse-glow">
-                <Brain className="w-10 h-10 text-nexus-accent" />
-              </div>
+              {/* Avatar */}
+              <NexusAvatar 
+                speaking={false}
+                expression="neutral"
+                size={200}
+              />
               <div>
                 <h1 className="text-2xl font-semibold text-nexus-text mb-2">Nexus understands you</h1>
                 <p className="text-nexus-muted max-w-md">
@@ -461,6 +481,18 @@ export default function App() {
           })}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Avatar — floating in corner when interacting */}
+        {messages.length > 0 && (
+          <div className="fixed bottom-24 right-6 z-40 transition-all duration-300 animate-fade-in">
+            <NexusAvatar 
+              ref={avatarRef}
+              speaking={isSpeaking || isProcessing}
+              expression={avatarExpression}
+              size={120}
+            />
+          </div>
+        )}
 
         {/* Intent input bar */}
         <div className="px-6 pb-6 pt-2">

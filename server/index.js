@@ -21,7 +21,7 @@ const { routeIntent, quickClassify } = require('../core/router');
 const { executeAction } = require('../actions');
 const { getSuggestions, getMorningBriefing, learnFromCorrection } = require('../core/learn');
 const voice = require('../actions/voice');
-const InteractiveVoice = require('../actions/interactive-voice');
+const VoiceChat = require('../actions/voice-chat');
 const { loadPlugins, getCustomIntents, getCustomActions, getLoadedPlugins, reloadPlugins } = require('../core/plugins');
 
 const PORT = process.env.NEXUS_PORT || 47900;
@@ -319,37 +319,34 @@ wss.on('connection', (ws) => {
 
       case 'voice_mode': {
         // Toggle interactive voice chat mode
-        const iv = new InteractiveVoice();
+        const vc = new VoiceChat();
         
         if (payload.enable) {
-          if (!iv.isActive) {
-            await iv.start(
-              (text) => routeIntent(text),
-              (routing) => executeAction(routing),
-              (text) => voice.speak(text)
-            );
-            
-            // Forward events to WebSocket
-            iv.on('state', (state) => {
-              ws.send(JSON.stringify({ id: 'iv-' + Date.now(), type: 'voice_state', state }));
-            });
-            iv.on('transcript', (text) => {
-              ws.send(JSON.stringify({ id: 'iv-' + Date.now(), type: 'voice_heard', text }));
-            });
-            iv.on('response', (data) => {
-              ws.send(JSON.stringify({
-                id: 'iv-' + Date.now(),
-                type: 'voice_response',
-                transcript: data.transcript,
-                intent: data.intent,
-                result: data.result,
-              }));
-            });
-            
-            ws.send(JSON.stringify({ id, type: 'voice_state', state: 'listening' }));
-          }
+          await vc.start(
+            (text) => routeIntent(text),
+            (routing) => executeAction(routing),
+            (text) => voice.speak(text)
+          );
+          
+          vc.on('state', (state) => {
+            ws.send(JSON.stringify({ id: 'vc-' + Date.now(), type: 'voice_state', state }));
+          });
+          vc.on('transcript', (text) => {
+            ws.send(JSON.stringify({ id: 'vc-' + Date.now(), type: 'voice_heard', text }));
+          });
+          vc.on('response', (data) => {
+            ws.send(JSON.stringify({
+              id: 'vc-' + Date.now(),
+              type: 'voice_response',
+              transcript: data.transcript,
+              intent: data.intent,
+              result: data.result,
+            }));
+          });
+          
+          ws.send(JSON.stringify({ id, type: 'voice_state', state: 'listening' }));
         } else {
-          iv.stop();
+          vc.stop();
           ws.send(JSON.stringify({ id, type: 'voice_state', state: 'idle' }));
         }
         break;

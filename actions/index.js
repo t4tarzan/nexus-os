@@ -315,6 +315,30 @@ async function graph_query(params, ctx) {
   return { success: true, result: { stats, recentInteractions: recent.map(r => r.raw_input) } };
 }
 
+// Generic conversation handler — when user is just chatting
+async function conversation(params, ctx) {
+  const userInput = ctx?.rawInput || '';
+  
+  // If the user seems to be asking about capabilities, show help
+  if (/what can you do|help|capabilities|how (do|can) (you|i)/i.test(userInput)) {
+    return show_help(params, ctx);
+  }
+
+  // Friendly greeting
+  if (/^(hi|hello|hey|yo|sup|good morning|good evening)/i.test(userInput)) {
+    return {
+      success: true,
+      result: `Hello! 👋 I'm Nexus. I can help you find files, send emails, check your calendar, look up contacts, search the web, and more. Just tell me what you need — no special commands required.\n\nTry: "find my recent documents" or "send email to..." or "what's on my calendar"`,
+    };
+  }
+
+  // Default chat response
+  return {
+    success: true,
+    result: `I'm Nexus, your personal OS assistant. I understand natural language — just tell me what you want to do!\n\nI can help with:\n• 📁 Finding and opening files\n• ✉️ Sending emails\n• 📅 Managing your calendar\n• 👤 Looking up contacts\n• 🌐 Searching the web\n• 💾 Saving notes\n• 🌤️ Checking weather\n• 🎤 Voice commands\n\nWhat would you like to do?`,
+  };
+}
+
 // Action registry
 const ACTION_MAP = {
   file_search, file_open, file_read, file_organize,
@@ -323,7 +347,7 @@ const ACTION_MAP = {
   shell_run,
   email_send, email_read,
   calendar_query, calendar_create,
-  contact_lookup, graph_query,
+  contact_lookup, graph_query, conversation,
 };
 
 // Execute an action based on routing result

@@ -1,6 +1,15 @@
 // Nexus Server — WebSocket-based command center
 // Connects the UI to the router + actions + graph
 
+// ─── Crash Protection ───
+process.on('uncaughtException', (err) => {
+  console.error('[server] UNCAUGHT:', err.message);
+  // Don't crash — log and continue
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[server] UNHANDLED REJECTION:', reason?.message || reason);
+});
+
 const { WebSocketServer } = require('ws');
 const http = require('http');
 const fs = require('fs');
@@ -26,6 +35,15 @@ console.log(`[server] Plugins: ${pluginInfo.plugins.map(p => p.name).join(', ') 
 
 // Create HTTP server (for health checks and static serving)
 const server = http.createServer((req, res) => {
+  // CORS headers for browser
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    return res.end();
+  }
+
   // Health check
   if (req.url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
